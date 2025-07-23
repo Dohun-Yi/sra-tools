@@ -922,6 +922,7 @@ static rc_t enter_fingerprint( KMDataNode * node, Fingerprint & fp )
 {
     KMDataNode * fp_node = nullptr;
     rc_t rc = KMDataNodeOpenNodeUpdate ( node, &fp_node, "FINGERPRINT" );
+    DISP_RC(rc, "cannot KMDataNodeOpenNodeUpdate FINGERPRINT");
     if ( rc == 0 )
     {
         std::ostringstream strm;
@@ -930,6 +931,7 @@ static rc_t enter_fingerprint( KMDataNode * node, Fingerprint & fp )
         fp.canonicalForm( json );
         json << '}';
         rc = KMDataNodeWrite ( fp_node, strm.str().data(), strm.str().size() );
+        DISP_RC(rc, "cannot KMDataNodeWrite FINGERPRINT");
     }
     KMDataNodeRelease(fp_node);
     return rc;
@@ -940,9 +942,12 @@ rc_t copy_current_fingerprint(const KMDataNode* src, KMDataNode* dst)
 {
     KMDataNode* fp_node = nullptr;
     rc_t rc = KMDataNodeOpenNodeUpdate(dst, &fp_node, "original");
+    DISP_RC(rc, "cannot KMDataNodeOpenNodeUpdate original");
 
-    if (rc == 0)
+    if (rc == 0) {
         rc = KMDataNodeCopy(fp_node, src);
+        DISP_RC(rc, "cannot KMDataNodeCopy original");
+    }
 
     rc_t r2 = KMDataNodeRelease(fp_node);
     if (rc == 0 && r2 != 0)
@@ -972,6 +977,7 @@ static rc_t add_meta_node(KMDataNode* current,
 
 static rc_t record_fp(KMDataNode* node, const Fingerprint& fp) {
     static string tm;
+
     rc_t rc = add_meta_node(node, "algorithm", fp.algorithm());
     if (rc == 0)
         rc = add_meta_node(node, "digest", fp.digest());
@@ -1017,6 +1023,7 @@ static rc_t add_fingerprint_event_meta ( Db & db, bool history = true  )
 
     const KMDataNode *cur_node = nullptr;
     if (!history)
+        /* can be not found */
         rc = KMetadataOpenNodeRead(dst_meta, &cur_node, "QC/current");
 
     const char* top = history ? "HISTORY" : "QC/history";
@@ -1107,15 +1114,22 @@ static rc_t add_fingerprint_event_meta ( Db & db, bool history = true  )
                   if (rc == 0) {
                       if (cur_node != nullptr)
                           rc = copy_current_fingerprint(cur_node, event_node);
-                      else
+                      else {
                           rc = add_fp_node(event_node, "original", db.in_fp);
+                          DISP_RC(rc,
+                              "cannot create original fingerprint node");
+                      }
                   }
-                  if (rc == 0)
+                  if (rc == 0) {
                       rc = add_fp_node(event_node,
                           "removed", db.update_in_fp);
-                  if (rc == 0)
+                      DISP_RC(rc, "cannot create removed fingerprint node");
+                  }
+                  if (rc == 0) {
                       rc = add_fp_node(event_node,
                           "added", db.update_out_fp);
+                      DISP_RC(rc, "cannot create added fingerprint node");
+                  }
                   KMDataNodeRelease(cur_node);
               }
               KMDataNodeRelease ( event_node );
@@ -1141,9 +1155,12 @@ static rc_t update_current_meta(Db& db) {
     KMDataNode* node = nullptr;
 
     rc_t rc = KMetadataOpenNodeUpdate(db.meta, &node, "QC/current");
+    DISP_RC(rc, "while Opening QC/current Metadata");
 
-    if (rc == 0)
+    if (rc == 0) {
         rc = record_fp(node, db.out_fp);
+        DISP_RC(rc, "cannot create QC/current fingerprint node");
+    }
 
     rc_t r2 = KMDataNodeRelease(node);
     if (rc == 0 && r2 != 0)
