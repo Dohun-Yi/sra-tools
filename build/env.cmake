@@ -26,6 +26,8 @@
 # Calculation of the global settings for the CMake build.
 #
 
+include(CheckCXXCompilerFlag)
+
 # allow implicit source file extensions
 if ( ${CMAKE_VERSION} VERSION_EQUAL "3.20" OR
      ${CMAKE_VERSION} VERSION_GREATER "3.20")
@@ -213,7 +215,6 @@ endif()
 
 set(COMPILER_OPTION_SSE42_SUPPORTED OFF)
 if( "x86_64" STREQUAL ${ARCH} )
-    include(CheckCXXCompilerFlag)
     CHECK_CXX_COMPILER_FLAG("-msse4.2" COMPILER_OPTION_SSE42_SUPPORTED)
 endif()
 # if (COMPILER_OPTION_SSE42_SUPPORTED)
@@ -773,23 +774,47 @@ if ( SINGLE_CONFIG )
     )
 endif()
 
-if( NOT SINGLE_CONFIG )
-	if( RUN_SANITIZER_TESTS )
-		message( "RUN_SANITIZER_TESTS (${RUN_SANITIZER_TESTS}) cannot be turned on in a non single config mode - overriding to OFF" )
-	endif()
-	set( RUN_SANITIZER_TESTS OFF )
-endif()
+execute_process( COMMAND sh -c "${CMAKE_CXX_COMPILER} -fsanitize=address test.cpp && ./a.out"
+    RESULT_VARIABLE ASAN_WORKS
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build  )
+execute_process( COMMAND sh -c "${CMAKE_CXX_COMPILER} -fsanitize=thread test.cpp && ./a.out"
+    RESULT_VARIABLE TSAN_WORKS
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build  )
 
-if( RUN_SANITIZER_TESTS )
-	if( LSB_RELEASE_ID_SHORT STREQUAL "Ubuntu" )
-		message("Disabling sanitizer tests on Ubuntu...")
-		set( RUN_SANITIZER_TESTS OFF )
-	endif()
-endif()
+if( ASAN_WORKS EQUAL 0 AND TSAN_WORKS EQUAL 0 )
 
-if( RUN_SANITIZER_TESTS_OVERRIDE )
-	message("Overriding sanitizer tests due to RUN_SANITIZER_TESTS_OVERRIDE: ${RUN_SANITIZER_TESTS_OVERRIDE}")
-	set( RUN_SANITIZER_TESTS ON )
+    if( NOT SINGLE_CONFIG AND RUN_SANITIZER_TESTS )
+        message( "RUN_SANITIZER_TESTS (${RUN_SANITIZER_TESTS}) cannot be turned on in a non single config mode - overriding to OFF" )
+        set( RUN_SANITIZER_TESTS OFF )
+    endif()
+
+    if( RUN_SANITIZER_TESTS_OVERRIDE )
+        message("Overriding sanitizer tests due to RUN_SANITIZER_TESTS_OVERRIDE: ${RUN_SANITIZER_TESTS_OVERRIDE}")
+        set( RUN_SANITIZER_TESTS ON )
+    endif()
+
+    #
+    # TSAN-instrumented programs used to crash on starup with certain version of Ubuntu kernel. Seems to be not thecase anymore, so disabling this section.
+    #
+    # if( RUN_SANITIZER_TESTS )
+    #     find_program(LSB_RELEASE_EXEC lsb_release)
+    #     execute_process(COMMAND ${LSB_RELEASE_EXEC} -is
+    #         OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT
+    #         OUTPUT_STRIP_TRAILING_WHITESPACE
+    #     )
+    #     message("LSB_RELEASE_ID_SHORT: ${LSB_RELEASE_ID_SHORT}")
+    #     if( LSB_RELEASE_ID_SHORT STREQUAL "Ubuntu" )
+    #         message("Disabling sanitizer tests on Ubuntu...")
+    #         set( RUN_SANITIZER_TESTS OFF )
+    #     endif()
+    # endif()
+
+else()
+
+    message("ASAN suport is not detected. Disabling sanitizer tests.")
+    set( RUN_SANITIZER_TESTS OFF )
+    set( RUN_SANITIZER_TESTS_OVERRIDE OFF )
+
 endif()
 message( "RUN_SANITIZER_TESTS: ${RUN_SANITIZER_TESTS}" )
 
@@ -804,7 +829,7 @@ function( GenerateStaticLibsWithDefs target_name sources compile_defs include_di
         target_compile_options( "${target_name}-tsan" PUBLIC -fsanitize=thread )
         target_link_options( "${target_name}-tsan" PUBLIC -fsanitize=thread )
     endif()
-    
+
     if( NOT "" STREQUAL "${compile_defs}" )
         target_compile_definitions( ${target_name} PRIVATE ${compile_defs} )
         if( RUN_SANITIZER_TESTS )
@@ -878,8 +903,12 @@ function( AddExecutableTest test_name sources libraries include_dirs )
 
 	add_test( NAME ${test_name} COMMAND ${test_name} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 	if( RUN_SANITIZER_TESTS )
-		add_test( NAME "${test_name}-asan" COMMAND "${test_name}-asan" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
-		add_test( NAME "${test_name}-tsan" COMMAND "${test_name}-tsan" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+	    if (NOT "--no-asan" IN_LIST ARGV)
+    		add_test( NAME "${test_name}-asan" COMMAND "${test_name}-asan" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+    	endif()
+	    if (NOT "--no-tsan" IN_LIST ARGV)
+    		add_test( NAME "${test_name}-tsan" COMMAND "${test_name}-tsan" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+    	endif()
 	endif()
 endfunction()
 

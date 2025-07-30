@@ -78,6 +78,8 @@
 #include "PrfRetrier.h"
 #include "PrfOutFile.h"
 
+#include <os-native.h> /* setenv */
+
 #include <strtol.h> /* strtou64 */
 #include <sysalloc.h>
 
@@ -518,8 +520,10 @@ static rc_t V_ResolverRemote(const VResolver *self,
                         v = &resolved->remoteHttp;
                     assert(v);
                     assert(path);
-                    if (v->path != NULL)
+                    if (v->path != NULL) {
+                        RELEASE(VPath, path);
                         continue;
+                    }
                     RELEASE(VPath, v->path);
                     v->path = path;
                 }
@@ -1512,6 +1516,11 @@ static rc_t PrfMainDownloadAscp(const Resolved *self, PrfMain *mane,
     opt.heartbeat = mane->heartbeat;
     opt.quitting = Quitting;
     opt.dryRun = mane->dryRun;
+
+#define NAME  "ASPERA_SCP_PASS"
+#define VALUE "743128bf-3bf3-45b5-ab14-4602c67f2950"
+    STSMSG(STS_INFO, (NAME "=" VALUE));
+    setenv(NAME, VALUE, 1);
 
     return aspera_get(mane->ascp, mane->asperaKey, src, to, &opt);
 }
