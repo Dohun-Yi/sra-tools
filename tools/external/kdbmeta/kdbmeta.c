@@ -604,7 +604,7 @@ rc_t md_update_expr ( KMDataNode *node, const char *attr, const char *expr )
         if ( attr != NULL )
         {
             if (z)
-                LOGERR ( LogErr, rc = RC(rcExe, rcFile, rcUpdating, rcConstraint, rcViolated), "node attribute values can not contain embedded '\0'" );
+                LOGERR ( klogErr, rc = RC(rcExe, rcFile, rcUpdating, rcConstraint, rcViolated), "node attribute values can not contain embedded nulls" );
             else 
                 rc = KMDataNodeWriteAttr ( node, attr, buff );
         }
