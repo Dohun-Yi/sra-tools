@@ -609,7 +609,7 @@ rc_t md_update_expr ( KMDataNode *node, const char *attr, const char *expr )
 
 struct Data {
     void *buffer;
-    size_t size; /* the actual size, not counting the '\0' that is always added */
+    size_t size;
 };
 
 static struct Data readFromKFile(KFile const *f, char const *path, rc_t *prc)
