@@ -881,6 +881,7 @@ static rc_t ResolvedFini(Resolved *self) {
     RELEASE(KSrvRespFile, self->respFile);
 
     free(self->name);
+    free(self->id);
 
     memset(self, 0, sizeof *self);
 
@@ -2144,9 +2145,9 @@ static rc_t ItemInit(Item *self, const char *obj) {
     return 0;
 }
 
-static char* ItemName(const Item *self, const char **id) {
+static char* ItemName(const Item *self, char **id) {
     char *c = NULL;
-    const char *dummy = NULL;
+    char *dummy = NULL;
     if (id == NULL)
         id = &dummy;
     assert(self);
@@ -2160,6 +2161,10 @@ static char* ItemName(const Item *self, const char **id) {
         assert(self->item);
         rc = KartItemItemId(self->item, &elem);
         *id = StringCheck(elem, rc);
+        if ( dummy != NULL )
+        {
+            free( dummy );
+        }
         /*
         rc = KartItemItemDesc(self->item, &elem);
         c = StringCheck(elem, rc);
@@ -2167,6 +2172,7 @@ static char* ItemName(const Item *self, const char **id) {
             return c;
         }
 */
+
         rc = KartItemAccession(self->item, &elem);
         c = StringCheck(elem, rc);
         if (c != NULL) {
