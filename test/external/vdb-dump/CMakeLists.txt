@@ -61,15 +61,14 @@ if ( NOT WIN32 )
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
-# see VDB-6027
-# 	if( TARGET vdb-dump-asan )
-#         add_test( NAME Test_Vdb_dump_asan
-#             COMMAND
-#                 ${CMAKE_COMMAND} -E env ${CONFIGTOUSE}=/
-#                 sh -c "./vdb_dump.sh ${TESTBINDIR}/vdb-dump-makedb ${DIRTOTEST} vdb-dump-asan"
-#             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#         )
-# 	endif()
+ 	if( TARGET vdb-dump-asan )
+         add_test( NAME Test_Vdb_dump_asan
+             COMMAND
+                 ${CMAKE_COMMAND} -E env ${CONFIGTOUSE}=/
+                 sh -c "./vdb_dump.sh ${TESTBINDIR}/vdb-dump-makedb ${DIRTOTEST} vdb-dump-asan"
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+         )
+ 	endif()
 	if( TARGET vdb-dump-tsan )
         add_test( NAME Test_Vdb_dump_tsan
             COMMAND
