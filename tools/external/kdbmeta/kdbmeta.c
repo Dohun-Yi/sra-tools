@@ -594,7 +594,7 @@ rc_t md_update_expr ( KMDataNode *node, const char *attr, const char *expr )
         {
             if (z)
                 LOGERR ( klogErr, rc = RC(rcExe, rcFile, rcUpdating, rcConstraint, rcViolated), "node attribute values can not contain embedded nulls" );
-            else 
+            else
                 rc = KMDataNodeWriteAttr ( node, attr, buff );
         }
         else
@@ -619,7 +619,7 @@ static struct Data readFromKFile(KFile const *f, char const *path, rc_t *prc)
     uint64_t size = 0;
     size_t numread = 0;
     rc_t rc = KFileSize(f, &size); assert(rc == 0);
-    
+
     result.size = size;
     *prc = rc; if (rc) return result;
     result.buffer = malloc(result.size);
@@ -669,7 +669,7 @@ static struct Data readFromFile(char const *path, rc_t *prc)
     else {
         KDirectory *dir = NULL;
         KFile const *f = NULL;
-        
+
         *prc = KDirectoryNativeDir(&dir); assert(*prc == 0);
         if (*prc == 0) {
             *prc = KDirectoryOpenFileRead(dir, &f, "%s", path);
@@ -848,6 +848,11 @@ static rc_t process_request(KDBMetaParms* pb) {
         if (rc != 0)
             PLOGERR(klogErr, (klogErr, rc,
                 "failed to delete node '$(node)'", "node=%s", delete_arg));
+        rc_t rc2 = KMDataNodeRelease( node );
+        if ( rc == 0 )
+        {
+            rc = rc2;
+        }
     }
     else {
         if (VectorDoUntil(pb->q, false, md_select, pb))
@@ -1348,7 +1353,7 @@ MAIN_DECL( argc, argv )
                     break;
                 }
                 if (pcount > 0) {
-                    rc = ArgsOptionValue(args, ARG, 0, 
+                    rc = ArgsOptionValue(args, ARG, 0,
                         (const void**)&delete_arg);
                     if (rc != 0) {
                         LOGERR(klogErr, rc,
