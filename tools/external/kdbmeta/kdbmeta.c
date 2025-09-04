@@ -1355,6 +1355,13 @@ MAIN_DECL( argc, argv )
                             "Failure to get '" ARG "' argument");
                         break;
                     }
+                    if(delete_arg[0]=='/'&& delete_arg[1]=='\0'){
+                        rc = RC(
+                            rcExe, rcArgv, rcReading, rcAttr, rcUnauthorized);
+                        LOGERR(klogErr, rc,
+                            "\"--" ARG " /\" is not allowed");
+                        break;
+                    }
                 }
             }
 
