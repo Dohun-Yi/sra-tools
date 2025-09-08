@@ -47,8 +47,7 @@ if ( Java_FOUND )
         if ( NOT TOOLS_ONLY )
 
             # LOGLEVEL values: WARNING (default), OFF, INFO, FINE, FINER, FINEST
-            set( LOGLEVEL FINEST )
-         #   set( LOGLEVEL OFF )
+            set( LOGLEVEL OFF )
             macro( RunAndDiff TestName TestParams )
                 add_test(
                     NAME Test_NgsJavaExamples_${TestName}
