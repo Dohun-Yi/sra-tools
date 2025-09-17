@@ -37,8 +37,8 @@ MAIN_DECL( argc, argv )
 
     bool locked = false;
 
-    VDBManager* mgr;
-    VTable *tbl;
+    VDBManager* mgr = NULL;
+    VTable *tbl = NULL;
     const VCursor *rCursor = NULL;
 
     int i;
