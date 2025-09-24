@@ -1970,7 +1970,7 @@ extern "C"
     {
         OUTMSG ((
         "Usage example:\n"
-        "  %s -r <reference accession> -p <position on reference> -q <query to look for> -l 0 [<parameters>]\n"
+        "  %s -r <reference accession> -p <position on reference> --query <query to look for> -l 0 [<parameters>]\n"
         "\n"
         "Summary:\n"
         "  Find a possible indel window\n"

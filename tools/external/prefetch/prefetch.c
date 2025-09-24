@@ -2601,15 +2601,36 @@ static rc_t ItemInitResolved(Item *self, VResolver *resolver, KDirectory *dir,
             bool local = false;
             KPathType type
                 = KDirectoryPathType(dir, "%s", self->desc) & ~kptAlias;
-            if (type == kptFile) {
+            if (type == kptFile || type == kptDir) {
                 char resolved[PATH_MAX] = "";
                 rc = KDirectoryResolvePath(dir, true, resolved, sizeof resolved,
                     "%s", self->desc);
                 if (rc == 0) {
-                    local = true;
-                    rc = VFSManagerMakePath((VFSManager*)1, &path,
-                        "%s", resolved);
-                } /* else rc is ignored */
+                    if (type == kptFile) {
+                        local = true;
+                        rc = VFSManagerMakePath(
+                            self->mane->vfsMgr, &path, "%s", resolved);
+                    }
+                    else if (type == kptDir) {
+                        rc = VFSManagerMakePath(
+                            self->mane->vfsMgr, &path, "%s", resolved);
+                        if (rc == 0) {
+                            const VPath* orig = path;
+                            VFSManagerCheckEnvAndAd(
+                                self->mane->vfsMgr, path, &orig);
+                            if (path != orig) {
+                                RELEASE(VPath, path);
+                                path = (VPath*)orig;
+                                local = true;
+                            }
+                            else
+                                RELEASE(VPath, path);
+                        }
+                        else
+                            rc = 0;
+                    }
+                }
+                else rc = 0;
             }
 
             if (local) {
