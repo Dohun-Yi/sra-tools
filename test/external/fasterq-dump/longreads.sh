@@ -50,13 +50,16 @@ spots = 1 : 3 : 57 : 102
 spots = 2 : 4 : 56 : 103
 spotgroup = SG1
 EOF
+echo "testing for long-reads: INI-file created"
 
 $RND2SRABIN --ini $RND2SRAINI
+echo "testing for long-reads: sample-accession generated"
 
 # =============================================================================$
 # run fasterq-dump to produce FASTQ-files
 # =============================================================================$
 $FASTERQDUMPBIN $ACC
+echo "testing for long-reads: FASTQ-files produced"
 
 # =============================================================================$
 # produce MD5-sums of the 2 FASTQ-files
@@ -76,6 +79,8 @@ EOF
 # compare actual against expected
 # =============================================================================$
 diff -s actual.txt expected.txt
+
+echo "testing for long-reads: success"
 
 cd ..
 rm -rf $SANDBOX
