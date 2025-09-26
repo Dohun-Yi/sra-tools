@@ -277,39 +277,6 @@ perl ../check-prefetch-out.pl 0 $verboseN \
                                                     || exit 273
 cd ${work_dir}                                      || exit 274
 
-cd tmp                                              || exit 275
-
-# test of kdbmeta SRR1219879/
-KDBMETA=$bin_dir/kdbmeta
-if [ -f $KDBMETA ] ; then
-    $KDBMETA -u SRR1219879/ LOAD/timestamp || exit 276
-else
-    echo $KDBMETA not found, test skipped
-fi
-
-# test of pileup-stats SRR053325/
-PILEUPSTATS=$bin_dir/pileup-stats
-if [ -f $PILEUPSTATS ] ; then
-    $PREFETCH SRR053325 || exit 277
-    $PILEUPSTATS SRR053325/ > /dev/null || exit 278
-    echo $PILEUPSTATS SRR053325/ test succeed
-else
-    echo $PILEUPSTATS not found, test skipped
-fi
-
-# test of prefetch SRR1219879/
-$PREFETCH SRR1219879/ || exit 279
-
-# test of srapath SRR1219879/
-SRAPATH=$bin_dir/srapath
-if [ -f $SRAPATH ] ; then
-    $SRAPATH SRR1219879/ | grep efetch/tmp/SRR1219879/SRR1219879.sra || exit 280
-else
-    echo $SRAPATH not found, test skipped
-fi
-
-cd ..
-
 rm     tmp/SRR1219879/SRR1219879.sra*               || exit 275
 rm     tmp/SRR1219880/SRR1219880.sra*               || exit 276
 rm     tmp/SRR1257493/SRR1257493.sra*               || exit 277
@@ -630,6 +597,38 @@ NCBI_SETTINGS=/   VDB_CONFIG=k ${bin_dir}/align-info ERR3091357 | grep http\
                                                                      && exit 597
 ls ERR3091357/ERR3091357.sralite ERR3091357/JTFH01 ERR3091357/KN707955.1 \
                                                          > /dev/null || exit 601
+
+
+ACCN=ERR3091357
+
+# test of kdbmeta ERR3091357/
+KDBMETA=$bin_dir/kdbmeta
+if [ -f $KDBMETA ] ; then
+    $KDBMETA -u $ACCN/ LOAD/timestamp || exit 602
+else
+    echo $KDBMETA not found, test skipped
+fi
+
+# test of pileup-stats ERR3091357/
+PILEUPSTATS=$bin_dir/pileup-stats
+if [ -f $PILEUPSTATS ] ; then
+    $PILEUPSTATS $ACCN/ > /dev/null || exit 603
+else
+    echo $PILEUPSTATS not found, test skipped
+fi
+
+# test of prefetch ERR3091357/
+$PREFETCH $ACCN/ || exit 604
+
+# test of srapath ERR3091357/
+SRAPATH=$bin_dir/srapath
+if [ -f $SRAPATH ] ; then
+    $SRAPATH $ACCN/ | grep efetch/tmp/$ACCN/$ACCN.sra || exit 605
+else
+    echo $SRAPATH not found, test skipped
+fi
+
+
 echo cd $work_dir
 cd ${work_dir}                                                       || exit 603
 COMMAND\
