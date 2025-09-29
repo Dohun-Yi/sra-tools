@@ -96,7 +96,6 @@ if ( NOT WIN32 )
     endif()
 
     # test if fasterq-dump can handle long reads ( longer than 64k ) / VDB-6105
-    ToolsRequired(fasterq-dump)
     add_test( NAME Test_FasterqDump_LongReads
         COMMAND sh -c "./longreads.sh ${BINDIR}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
