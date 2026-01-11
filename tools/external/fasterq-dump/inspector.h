@@ -58,6 +58,7 @@ typedef struct insp_input_t
     const char * accession_short;
     const char * accession_path;
     const char * requested_seq_tbl_name;
+    uint64_t total_limit; // new
 } insp_input_t;
 
 typedef enum acc_type_t { 

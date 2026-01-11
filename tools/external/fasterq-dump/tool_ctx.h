@@ -91,6 +91,7 @@ typedef struct tool_ctx_t {
     uint32_t stop_after_step;
     uint64_t total_ram;
     uint64_t row_limit;
+    uint64_t total_limit; // new
 
     format_t fmt; /* helper.h */
     check_mode_t check_mode; /* helper.h */

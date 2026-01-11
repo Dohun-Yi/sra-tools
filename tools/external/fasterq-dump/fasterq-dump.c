@@ -218,6 +218,10 @@ static const char * row_limit_usage[] = { "limit rowcount per thread", NULL };
 #define OPTION_ROW_LIMIT        "row-limit"
 #define ALIAS_ROW_LIMIT         "l"
 
+static const char * total_limit_usage[] = { "limit total number of spots (downsampling)", NULL }; // new
+#define OPTION_TOTAL_LIMIT      "total-limit"
+#define ALIAS_TOTAL_LIMIT       "X"
+
 static const char * check_usage[] = { "switch to control:",
                                       "on=perform size-check (default), ",
                                       "off=do not perform size-check, ",
@@ -282,6 +286,7 @@ OptDef ToolOptions[] = {
     { OPTION_DISK_LIMIT_TMP,NULL,               NULL, disk_limit_tmp_usage, 1, true,   false },
     { OPTION_CHECK,         NULL,               NULL, check_usage,          1, true,   false },
     { OPTION_NGC,           NULL,               NULL, ngc_usage,            1, true,   false },
+    { OPTION_TOTAL_LIMIT,   ALIAS_TOTAL_LIMIT,  NULL, total_limit_usage,    1, true,   false }, // new
     { OPTION_KEEP,          NULL,               NULL, keep_usage,           1, false,  false },
     { OPTION_STEP,          NULL,               NULL, step_usage,           1, true,   false },
     { OPTION_ROW_LIMIT,     ALIAS_ROW_LIMIT,    NULL, row_limit_usage,      1, true,   false }
@@ -381,6 +386,7 @@ static rc_t main_get_user_input( tool_ctx_t * tool_ctx, const Args * args ) {
     tool_ctx -> buf_size = ahlp_get_size_t_option( args, OPTION_BUFSIZE, DFLT_BUF_SIZE );
     tool_ctx -> mem_limit = ahlp_get_size_t_option( args, OPTION_MEM, DFLT_MEM_LIMIT );
     tool_ctx -> row_limit = ahlp_get_uint64_t_option( args, OPTION_ROW_LIMIT, 0 );
+    tool_ctx -> total_limit = ahlp_get_uint64_t_option( args, OPTION_TOTAL_LIMIT, 0 ); // new
     tool_ctx -> disk_limit_out_cmdl = ahlp_get_size_t_option( args, OPTION_DISK_LIMIT_OUT, 0 );
     tool_ctx -> disk_limit_tmp_cmdl = ahlp_get_size_t_option( args, OPTION_DISK_LIMIT_TMP, 0 );
     tool_ctx -> num_threads = ahlp_get_uint32_t_option( args, OPTION_THREADS, DFLT_NUM_THREADS );

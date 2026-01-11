@@ -884,10 +884,20 @@ static rc_t insp_seq_data( const VTable * tbl, const insp_input_t * input, insp_
                 ErrMsg( "insp_seq_data().VCursorOpen( '%s' ) -> %R", seq -> tbl_name, rc );
             }
         }
-        if ( 0 == rc ) {
+        /** if ( 0 == rc ) { */
+        /**     rc = VCursorIdRange( cur, id_read, &( seq -> first_row ), &( seq -> row_count ) ); */
+        /**     if ( 0 != rc ) { */
+        /**         ErrMsg( "insp_seq_data().VCursorIdRange( '%s' ) -> %R", seq -> tbl_name, rc ); */
+        /**     } */
+        /** } */
+        if ( 0 == rc ) { // new
             rc = VCursorIdRange( cur, id_read, &( seq -> first_row ), &( seq -> row_count ) );
             if ( 0 != rc ) {
                 ErrMsg( "insp_seq_data().VCursorIdRange( '%s' ) -> %R", seq -> tbl_name, rc );
+            } else {
+                if ( input -> total_limit > 0 && seq -> row_count > input -> total_limit ) {
+                    seq -> row_count = input -> total_limit;
+                }
             }
         }
         if ( 0 == rc ) {
